@@ -1,0 +1,53 @@
+<!-- This file is given to the client in the main route -->
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Users list</title>
+</head>
+<body>
+    <h1>Welcome <%= username.username %></h1>
+    <table id="usersTable">
+        <tr id="rowHeader">
+            <th>UserName</th>
+            <th>Role</th>
+            <th>Avatar</th>
+            
+        </tr>
+    </table>
+    
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        var allusers ;
+
+        const table = document.getElementById('usersTable');
+        let signal = document.createElement('p');
+        
+
+        function populateTable(users){
+            users.forEach(u => { 
+                let row = table.insertRow(); 
+                let cellName = row.insertCell();
+                let cellRole = row.insertCell();
+                let cellAvatar = row.insertCell();
+               
+
+                cellName.innerText = u.username;
+                cellRole.innerText = u.role;
+                cellAvatar.innerText = "";
+                let avatarImage = document.createElement('img');
+                let stringValue = "data:image/jpg;base64," + (u.avatar.data);
+                avatarImage.setAttribute('height', 200);
+                avatarImage.setAttribute('width', 200);
+                avatarImage.setAttribute('src', stringValue);
+                cellAvatar.appendChild(avatarImage);
+
+            });
+        }
+        
+    </script>
+</body>
+</html>
+

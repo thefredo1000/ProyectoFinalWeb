@@ -1,0 +1,82 @@
+<!-- This file is given to the client in the main route -->
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col-6">
+                <h1>Register New User</h1>
+                <form>
+                    <label for="txtUser">Username:</label>
+                    <input type="text" id="txtUser" value=""><br>
+
+                    <label for="txtPass">Password:</label>
+                    <input type="password" id="txtPass"><br>
+
+                    <label for="avatarImage">Avatar Image:</label>
+                    <input type="file" id="avatarImage"><br>
+
+                    <input type="button" class="btn btn-primary"  type="submit" id="submit" value="Register"> 
+                </form>
+                
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        const txtName = document.getElementById('txtUser');
+        const txtPrice = document.getElementById('txtPass');
+        const avatarImage =  document.getElementById('avatarImage');
+        
+        
+        const btnRegister = document.getElementById('submit');
+        btnRegister.addEventListener("click", (e) => {
+            e.preventDefault();
+            
+            let username = txtUser.value.trim();
+            let password = txtPass.value.trim();
+           
+
+            // Comment to check out how server validation is working too
+            if (username === '') { alert('Specify a username'); return; }
+            if (password === '') { alert('Specify a password'); return; }
+
+
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            const files = avatarImage.files;
+            formData.append('avatar', files[0])
+            
+            axios.post('http://127.0.0.1:3000/users/create', formData)
+            .then(response => {
+                console.log(response);
+                alert(`User was Register Succefully!, Please Log In`);
+                window.location.replace('http://127.0.0.1:3000/login');
+            })
+            .catch(error => {
+                console.log(error.response.data)
+                alert(`User Couldnt be Register`);
+            });
+            
+        });
+
+        
+    </script>
+</body>
+</html>
+

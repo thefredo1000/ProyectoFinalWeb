@@ -1,0 +1,258 @@
+<!-- This file is given to the client in the main route -->
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shopping list</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                            
+                <h1>Welcome <%= user.username %></h1>
+                
+                <%if (user.username == "admin") { %>
+                    <button type="button" class="btn btn-primary" id="btnAdd2DB">Add product to DataBase</button>
+                <% } else{ %>  
+                    <button type="button" class="btn btn-primary" id="editUserbtn">Edit Profile</button>
+                <% } %>
+
+                <button type="button" class="btn btn-primary" id="logout">Log Out</button>
+                
+                <h2>Shopping List</h2>
+
+                <button type="button" class="btn btn-primary" id="btnAdd">Add product</button>
+
+
+                <input type="search" list="productselector" id = "productselectorin"/>
+                <datalist id="productselector"></datalist>
+
+                <label for="txtQuantity">Quantity:</label>
+                <input type="number" id="txtQuantity"><br>
+
+                <table id="productsTable" class="table table-striped table-hover">
+                    <tr id="rowHeader">
+                        <th>Name</th>
+                        <th>Ind Price</th>
+                        <th>Total Price</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </table>
+                
+
+                <p id = "total"></p>
+
+                </table>
+
+                <button type="button" class="btn btn-primary" id="btnDone">Done</button>
+
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+
+        const btnAdd = document.getElementById('btnAdd');
+        const btnDone = document.getElementById('btnDone');
+        const editUserbtn = document.getElementById('editUserbtn');
+        const table = document.getElementById('productsTable');
+        let signal = document.createElement('p');
+        let total = document.getElementById("total");
+        var total_float = 0.0;
+        
+        var total_string = "Total : $";
+
+
+        var allProducts = new Map();
+        let selProducts = [];
+
+
+        function addProductToList(products){
+
+
+            var options;
+
+            products.forEach(m => {
+                allProducts.set(m.name, m.price);
+                options += '<option>' + m.name + '</option>'
+            });
+
+            document.getElementById('productselector').innerHTML = options;
+        }
+
+        axios.get('http://127.0.0.1:3000/products')
+        .then(response => {
+            console.log(response);
+            addProductToList(response.data);
+            total.innerText = total_string.concat(total_float.toString());
+            
+        })
+        .catch(error => {
+            console.log(error);
+            alert(`Problem when retrieving product info ${error.response}`);
+        });
+
+        function populateTable(m){
+            
+            let row = table.insertRow(); 
+            let cellName = row.insertCell();
+            let cellIndPrice = row.insertCell();
+            let cellPrice = row.insertCell();
+            let cellEdit = row.insertCell();
+            let cellDelete = row.insertCell();
+            
+            cellName.innerText = m.name;
+            cellIndPrice.innerText = "$".concat(m.price);
+            cellPrice.innerText = "$".concat(m.totalPrice);
+
+            total_float = total_float + parseFloat(m.totalPrice);
+
+
+            btnEdit = document.createElement('button');
+            btnEdit.setAttribute("class", "btn btn-primary")
+            btnEdit.setAttribute("type", "button")
+            btnEdit.style = "margin: 5px"
+            btnEdit.appendChild(document.createTextNode('Edit'));
+            btnEdit.addEventListener('click', () => { 
+
+                document.getElementById('productselectorin').value = m.name;
+                document.getElementById('txtQuantity').value = m.quantity;
+
+                total_float = total_float - parseFloat(m.totalPrice);
+                total.innerText = total_string.concat(total_float.toString());
+                row.parentNode.removeChild(row);
+
+                var index = selProducts.findIndex(function(post, index) {
+                    if(post.name == m.name)
+                        return true;
+                });
+
+                selProducts.splice(index,1);
+
+                
+             });
+            cellEdit.appendChild(btnEdit);
+
+            btnDelete = document.createElement('button');
+            btnDelete.setAttribute("class", "btn btn-danger")
+            btnDelete.setAttribute("type", "button")
+            btnDelete.style = "margin: 5px"
+            btnDelete.appendChild(document.createTextNode('Delete'));
+            btnDelete.addEventListener('click', (event) => {
+
+                total_float = total_float - parseFloat(m.totalPrice);
+                total.innerText = total_string.concat(total_float.toString());
+                row.parentNode.removeChild(row);
+
+                var index = selProducts.findIndex(function(post, index) {
+                    if(post.name == m.name)
+                        return true;
+                });
+
+                selProducts.splice(index,1);
+
+            });
+
+            cellDelete.appendChild(btnDelete);
+
+            total.innerText = total_string.concat(total_float.toString());
+
+        }
+        
+        const username = '<%= user.username %>';
+        
+        if(username == "admin"){
+
+            btnAdd2DB.addEventListener('click', () => {
+                window.location.replace(`http://127.0.0.1:3000/products/create`);
+            });
+
+
+        }else{
+                const userId = '<%= user.id %>';
+                editUserbtn.addEventListener('click', () => {
+                window.location.replace(`http://127.0.0.1:3000/users/${userId}/edit`);
+            });
+        }
+        
+        
+        
+        const btnLogout = document.getElementById('logout');
+        btnLogout.addEventListener("click", (e) => {
+            axios.post('http://127.0.0.1:3000/logout') // No params, the cookie handles it all
+            .then(response => {
+                console.log(response);
+                alert(`You have been logged out, you are being redirected`);
+                window.location.replace('http://127.0.0.1:3000/login');
+            })
+            .catch(error => {
+                console.log(error.response.data)
+                alert(`Error: ${error.response.data}`);
+            });
+        });
+
+        
+
+        btnAdd.addEventListener("click", (e) => {
+
+            const txtName = document.getElementById('productselectorin').value;
+            const txtQuantity = document.getElementById('txtQuantity').value;
+
+            if ((txtName !== "" && txtQuantity !== "") && (parseInt(txtQuantity) >= 0)) {
+                var product = new Object();
+
+                
+                product.name = txtName;
+                product.totalPrice = parseFloat(allProducts.get(txtName)) * parseFloat(txtQuantity);
+                product.price = parseFloat(allProducts.get(txtName));
+                product.quantity =  parseFloat(txtQuantity);
+
+                selProducts.push(product);
+
+                populateTable(product)
+            }
+
+
+        });
+
+
+        btnDone.addEventListener("click", (e) => {
+
+            console.log(selProducts);
+            
+            axios.post('http://127.0.0.1:3000/users/checkout',
+            
+            {
+                    username: username,
+                    products: selProducts
+                }
+            )
+            .then(response => {
+                
+            })
+            .catch(error => {
+                console.log(error);
+                alert(`Problem when retrieving product info ${error.response}`);
+            });
+            
+            
+        });
+
+    </script>
+
+
+   
+</body>
+</html>
+

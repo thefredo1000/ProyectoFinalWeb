@@ -21,6 +21,9 @@
                     <label for="txtUser">Username:</label>
                     <input type="text" id="txtUser" value=""><br>
 
+                    <label for="txtEmail">Email:</label>
+                    <input type="text" id="txtEmail" value=""><br>
+
                     <label for="txtPass">Password:</label>
                     <input type="password" id="txtPass"><br>
 
@@ -39,6 +42,8 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
         const txtName = document.getElementById('txtUser');
+        const txtEmail = document.getElementById('txtEmail');
+
         const txtPrice = document.getElementById('txtPass');
         const avatarImage =  document.getElementById('avatarImage');
         
@@ -48,16 +53,20 @@
             e.preventDefault();
             
             let username = txtUser.value.trim();
+
+            let email = txtEmail.value.trim();
             let password = txtPass.value.trim();
            
 
             // Comment to check out how server validation is working too
             if (username === '') { alert('Specify a username'); return; }
+            if (email === '') { alert('Specify a email'); return; }
             if (password === '') { alert('Specify a password'); return; }
 
 
             const formData = new FormData();
             formData.append('username', username);
+            formData.append('email', email);
             formData.append('password', password);
             const files = avatarImage.files;
             formData.append('avatar', files[0])

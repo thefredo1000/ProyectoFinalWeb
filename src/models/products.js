@@ -4,6 +4,7 @@ let validator = require('validator')
 
 let productSchema = new mongoose.Schema({
   name: String,
+  brand: String,
   price: { type: Number, required: [true, 'A rating is needed for this product']},
 });
 

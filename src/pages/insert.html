@@ -21,6 +21,10 @@
                     <input type="text" id="txtName" value=""><br>
                     <br>
 
+                    <label for="txtBrand">Product Brand:</label>
+                    <input type="text" id="txtBrand" value=""><br>
+                    <br>
+
                     <label for="txtPrice">Price:</label>
                     <input type="number" id="txtPrice"><br>
                     <br>
@@ -34,6 +38,7 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
         const txtName = document.getElementById('txtName');
+        const txtBrand = document.getElementById('txtBrand');
         const txtPrice = document.getElementById('txtPrice');
         
         
@@ -42,12 +47,14 @@
             e.preventDefault();
             
             let name = txtName.value.trim();
+            let brand = txtBrand.value.trim();
             let price = txtPrice.value.trim();
             console.log(price)
            
 
             // Comment to check out how server validation is working too
             if (name === '') { alert('Specify a name'); return; }
+            if (brand === '') { alert('Specify a brand'); return; }
             if (price ==='' || isNaN(price)) { alert('Input valid price'); return; }
             if ((parseInt(price) <= 0)) { alert('Enter a positive number'); return; }
 
@@ -55,6 +62,7 @@
                 'http://127.0.0.1:3000/products/create', 
                 {
                     name: name,
+                    brand: brand,
                     price: price,
                     
                 }

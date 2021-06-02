@@ -16,18 +16,14 @@ const ejs = require('ejs');
 require('./src/database');
 let ProductModel = require('./src/models/products');
 
-
-
-
-
 app.route('/products/create').get((req, res) =>{
     res.sendFile('insert.html', {root: './src/pages/'});
 });
 
 app.route('/products/create').post((req, res) =>{
-    let{ name, price } = req.body; // JS object deconstruction
+    let{ name, brand,  price } = req.body; // JS object deconstruction
     
-    let product = new ProductModel({name: name, price: price});
+    let product = new ProductModel({name: name, brand: brand, price: price});
     product.save((err) => {
         if (err) res.status(503).send(`error: ${err}`); 
         else res.send(product);
@@ -54,11 +50,12 @@ app.route('/products/:id').get(async (req, res) => {
 
 app.route('/products/:id').put((req, res) => {
     let productId  = req.params.id;
-    let{ name, price } = req.body;
+    let{ name, brand, price } = req.body;
     ProductModel.findOneAndUpdate(
         {_id: productId}, // selection criteria
         {
             name: name,
+            brand: brand,
             price: price,
         }
     )
@@ -112,7 +109,7 @@ function createAdmin(){
         contentType: 'image/jpg'
     };
     
-    let user = new UsersModel({username: "admin", password: "admin", role: "admin", avatar:avatarObject});
+    let user = new UsersModel({username: "admin", email : "admin@gmail.com", password: "admin", role: "admin", avatar:avatarObject});
 
     user.save();
 
@@ -130,6 +127,7 @@ app.route('/users/create').get( (req, res) =>{
 app.post('/users/create', upload.single('avatar'), (req, res) => {
 
     let username = req.body.username;
+    let email = req.body.email;
     let password = req.body.password;
 
     console.log(req.file.filename);
@@ -140,7 +138,7 @@ app.post('/users/create', upload.single('avatar'), (req, res) => {
         contentType: 'image/jpg'
     };
     
-    let user = new UsersModel({username: username, password: password, role: "Client", avatar:avatarObject});
+    let user = new UsersModel({username: username, email:email, password: password, role: "Client", avatar:avatarObject});
 
     user.save((err) => {
 
@@ -165,6 +163,7 @@ app.route('/users').get(async (req, res) => {
         modifiedUsers.push({
             _id: u._id, 
             username: u.username, 
+            email: u.email,
             role: u.role,
             password: u.password,
             avatar: {
@@ -198,6 +197,7 @@ app.route('/users/:id').get(async (req, res) => {
         res.send({
             _id: user._id, 
             username: user.username, 
+            email: user.email,
             password: user.password,
             avatar: {
                 contentType: user.avatar.contentType,
@@ -212,6 +212,7 @@ app.put('/users/:id', upload.single('avatar'), async (req, res) => {
     let userId = req.params.id;
     let user = await UsersModel.findOne({_id: userId});
     user.username = req.body.username;
+    user.email = req.body.email;
     user.password = req.body.password;
 
     if (req.file){

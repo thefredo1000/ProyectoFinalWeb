@@ -15,9 +15,11 @@ const ejs = require('ejs');
 
 require('./src/database');
 let ProductModel = require('./src/models/products');
+let UsersModel = require('./src/models/users');
+let TicketModel = require('./src/models/tickets');
 
-app.route('/products/create').get((req, res) =>{
-    res.sendFile('insert.html', {root: './src/pages/'});
+app.route('/products/create').get((req, res) => {
+    res.sendFile('insert.html', {root: './src/pages/'})
 });
 
 app.route('/products/create').post((req, res) =>{
@@ -115,13 +117,12 @@ function createAdmin(){
 
 }
 
-let UsersModel = require('./src/models/users');
 createAdmin();
 
 
 
 app.route('/users/create').get( (req, res) =>{
-    res.sendFile('registerPage.html', {root: './src/pages/'});
+    res.sendFile('registerPage.html', {root: './src/pages/'} );
 });
 
 app.post('/users/create', upload.single('avatar'), (req, res) => {
@@ -240,16 +241,63 @@ app.route('/users/:id').delete((req, res) => {
 app.route('/users/checkout').post((req, res) => {
 
 
-    console.log(req.body);
-
-    ejs.renderFile('./src/pages/checkout.html', {username: req.body.username, products: req.body.products}, null, function(err, str){
-        if (err) res.status(503).send(`error when rendering the view: ${err}`); 
-        else {
-            res.end(str);
-        }
+    // let product = new ProductModel({name: name, brand: brand, price: price});
+    var products = []
+    req.body.products.forEach((prod) => {
+        products.push({name: prod.name, brand: prod.brand, price: prod.price, quantity: prod.quantity, totalPrice: prod.totalPrice})
+    })
+    console.log(req.body)
+    // let user = new UsersModel({username: username, email:email, password: password, role: "Client", avatar:avatarObject});
+    let ticket = new TicketModel({username: req.body.username, products: products, totalPrice: req.body.totalPrice})
+    console.log(ticket)
+    ticket.save()
+    res.send({
+        _id: ticket._id, 
+        username: ticket.username
     });
-
 });
+
+app.route('/users/checkout/:id').get(async (req, res) => {
+
+    let ticketId  = req.params.id;
+    let ticket = await TicketModel.findOne({_id: ticketId});
+    
+
+    if (ticket){
+        // res.send({
+        //     _id: ticket._id, 
+        //     username: ticket.username, 
+        //     totalPrice: ticket.totalPrice,
+        // });
+        
+        ejs.renderFile('./src/pages/checkout.html', {ticketId: ticketId}, null, function(err, str){
+            if (err) res.status(503).send(`error when rendering the view: ${err}`); 
+            else {
+                res.end(str);
+            }
+        });
+    }
+        
+    else
+        res.status(404).end(`User with id ${ticketId} does not exist`)
+
+    
+});
+
+app.route('/ticket/:id').get(async (req, res) =>{
+    let ticketId  = req.params.id;
+    let ticket = await TicketModel.findOne({_id: ticketId});
+    if (ticket)
+        res.send({
+            _id: ticket._id, 
+            username: ticket.username, 
+            totalPrice: ticket.totalPrice,
+            products: ticket.products
+        });
+        
+    else
+        res.status(404).end(`User with id ${userId} does not exist`)
+})
 
 const secret = "5tr0n6P@55W0rD";
 

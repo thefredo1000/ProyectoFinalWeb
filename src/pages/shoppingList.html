@@ -15,7 +15,7 @@
         <div class="row">
             <div class="col">
                             
-                <h1>Welcome <%= user.username %></h1>
+                <h1>Hello <%= user.username %></h1>
                 
                 <%if (user.username == "admin") { %>
                     <button type="button" class="btn btn-primary" id="btnAdd2DB">Add product to DataBase</button>
@@ -239,11 +239,16 @@
             
             {
                     username: username,
-                    products: selProducts
+                    products: selProducts,
+                    totalPrice: total_float
                 }
             )
             .then(response => {
-                
+                axios.get('http://127.0.0.1:3000/ticket/' + response.data._id)
+                    .then(res => {
+                        console.log(res)
+                        window.location.replace(`http://127.0.0.1:3000/users/checkout/${response.data._id}`);
+                    })
             })
             .catch(error => {
                 console.log(error);

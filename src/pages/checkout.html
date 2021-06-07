@@ -5,47 +5,81 @@
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Users list</title>
+  <title>Checkout</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 </head>
 <body>
-    <h1>Welcome <%= username.username %></h1>
-    <table id="usersTable">
-        <tr id="rowHeader">
-            <th>UserName</th>
-            <th>Role</th>
-            <th>Avatar</th>
-            
-        </tr>
-    </table>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                            
+                <h1>Checkout</h1>
+                
+
+                <table id="productsTable" class="table table-striped table-hover">
+                    <tr id="rowHeader">
+                        <th>Name</th>
+                        <th>Brand</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                </table>
+                
+
+                <p id = "total"></p>
+
+                </table>
+
+                <button type="button" class="btn btn-success" id="btnDone">Confirm Purchase</button>
+
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
     
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-        var allusers ;
+        const table = document.getElementById('productsTable');
+        var total_float = 0.0;
+        function populateTable(m){
+            
+            let row = table.insertRow(); 
+            let cellName = row.insertCell();
+            let cellBrand = row.insertCell();
+            let cellPrice = row.insertCell();
+            let cellQty = row.insertCell();
+            let cellTotal = row.insertCell();
+            
+            cellName.innerText = m.name;
+            cellBrand.innerText = m.brand;
+            cellPrice.innerText = "$".concat(m.price);
+            cellTotal.innerText = "$".concat(m.totalPrice);
+            cellQty.innerText = m.quantity
 
-        const table = document.getElementById('usersTable');
-        let signal = document.createElement('p');
-        
+            total_float = total_float + m.totalPrice
 
-        function populateTable(users){
-            users.forEach(u => { 
-                let row = table.insertRow(); 
-                let cellName = row.insertCell();
-                let cellRole = row.insertCell();
-                let cellAvatar = row.insertCell();
-               
+            document.getElementById("total").innerText = "Total: $" + total_float
 
-                cellName.innerText = u.username;
-                cellRole.innerText = u.role;
-                cellAvatar.innerText = "";
-                let avatarImage = document.createElement('img');
-                let stringValue = "data:image/jpg;base64," + (u.avatar.data);
-                avatarImage.setAttribute('height', 200);
-                avatarImage.setAttribute('width', 200);
-                avatarImage.setAttribute('src', stringValue);
-                cellAvatar.appendChild(avatarImage);
-
-            });
         }
+
+
+        id = window.location.pathname.split("/")[3]
+        axios.get('http://127.0.0.1:3000/ticket/' + id)
+            .then(res => {
+                console.log(res)
+                res.data.products.forEach(val => {
+                    populateTable(val)
+                })
+            })
+
+        let btnDone = document.getElementById("btnDone")
+        btnDone.addEventListener("click", (e) => {
+            window.location.replace('http://127.0.0.1:3000/');
+        })
         
     </script>
 </body>
